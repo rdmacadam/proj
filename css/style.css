@@ -14,7 +14,13 @@
 
 * { box-sizing: border-box; }
 
-html { background: var(--deep); }
+html {
+  background: var(--deep);
+  overscroll-behavior: none;
+}
+/* main.js sets this when the page fits the screen, so drags become ripples, not scrolls */
+body.noscroll { touch-action: none; }
+.btn { touch-action: manipulation; }
 
 body {
   margin: 0;
@@ -106,6 +112,9 @@ h1 {
   backdrop-filter: blur(18px) saturate(150%);
   box-shadow: 0 20px 80px rgba(5, 6, 15, 0.55), 0 0 60px rgba(123, 63, 228, 0.25);
   text-align: left;
+  /* degrees, written by main.js from pointer position or device tilt */
+  transform: perspective(900px) rotateX(calc(var(--tilt-y, 0) * 1deg)) rotateY(calc(var(--tilt-x, 0) * 1deg));
+  will-change: transform;
 }
 .card::before {
   content: "";
