@@ -18,9 +18,10 @@ Any static host works too (GitHub Pages, Netlify, ...).
 
 ## Add your links and projects
 
-- **multaichat link:** set the `href` of `.btn` inside `#multaichat` in `index.html`
-  (it is `#` for now).
-- **Copy:** the title, tagline and card text are plain HTML in `index.html`.
+- **multaichat link:** the `href` of `.btn` inside `#multaichat` in `index.html`
+  points at the deployed app.
+- **Copy:** the title, tagline and card text (description and tag chips) are plain
+  HTML in `index.html`.
 - **More projects:** copy the `<article class="card">` block (give it its own `id`).
   Only `#multaichat` is wired to the 3D tilt; to tilt more cards, change the
   `getElementById("multaichat")` lookup in `js/main.js` to select every `.card`.

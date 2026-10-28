@@ -44,7 +44,7 @@ async function layoutChecks() {
 
     if (w === 390) {
       const href = await page.locator("#multaichat .btn").getAttribute("href").catch(() => null);
-      check("btn-placeholder", href?.endsWith("#") ?? false, String(href));
+      check("multaichat-link", href === "https://elegant-medovik-1513af.netlify.app", String(href));
     }
     await ctx.close();
   }
