@@ -1,0 +1,10 @@
+{
+  "name": "proj",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "node test/e2e/server.mjs",
+    "test": "node --test test/*.test.js",
+    "e2e": "node test/e2e/run.mjs"
+  }
+}

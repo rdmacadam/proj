@@ -1,0 +1,184 @@
+:root {
+  --deep: #05060f;
+  --teal: #1ec8b0;
+  --violet: #7b3fe4;
+  --pink: #ff4fd8;
+  --white: #fff4fb;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--deep); }
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  color: var(--white);
+  background: var(--deep);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Backdrop: the static/fallback look. It sits under the canvas, so it also
+   shows through before the first frame and when JS or WebGL is unavailable. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  background: var(--deep);
+}
+.backdrop::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  background: url("../assets/chladni.jpg") center / cover no-repeat;
+}
+body.no-gl .backdrop::before,
+body.static .backdrop::before {
+  animation: drift 42s ease-in-out infinite alternate, hue 36s linear infinite;
+}
+
+#bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+body.no-gl #bg,
+body.static #bg { display: none; }
+
+main {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(28px, 6vh, 56px);
+  padding:
+    max(24px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(3.25rem, 14vw, 8.5rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  background: linear-gradient(100deg, var(--white) 10%, var(--pink) 45%, var(--teal) 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 28px rgba(255, 79, 216, 0.45));
+}
+
+.tagline {
+  margin: 14px 0 0;
+  font-size: clamp(0.7rem, 2.6vw, 0.85rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 244, 251, 0.78);
+  text-shadow: 0 1px 12px rgba(5, 6, 15, 0.9);
+}
+
+.card {
+  position: relative;
+  width: min(100%, 520px);
+  padding: clamp(24px, 6vw, 40px);
+  border-radius: 28px;
+  background: rgba(10, 8, 24, 0.46);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 20px 80px rgba(5, 6, 15, 0.55), 0 0 60px rgba(123, 63, 228, 0.25);
+  text-align: left;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--angle),
+    var(--teal), var(--violet), var(--pink), var(--white), var(--pink), var(--violet), var(--teal)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: spin 9s linear infinite;
+  pointer-events: none;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+.card h2 {
+  margin: 0;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 9vw, 3.4rem);
+  line-height: 1.05;
+}
+.blurb {
+  margin: 12px 0 28px;
+  font-size: clamp(1rem, 3.6vw, 1.15rem);
+  line-height: 1.5;
+  color: rgba(255, 244, 251, 0.82);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  border-radius: 999px;
+  color: var(--deep);
+  background: linear-gradient(100deg, var(--teal), var(--pink));
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  box-shadow: 0 0 32px rgba(255, 79, 216, 0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.btn:hover,
+.btn:focus-visible {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 48px rgba(30, 200, 176, 0.6);
+  outline: none;
+}
+
+@keyframes spin { to { --angle: 360deg; } }
+@keyframes drift {
+  from { transform: translate3d(-3%, -2%, 0) scale(1.02); }
+  to { transform: translate3d(3%, 2%, 0) scale(1.12); }
+}
+@keyframes hue {
+  from { filter: hue-rotate(0deg) saturate(1.15); }
+  to { filter: hue-rotate(360deg) saturate(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop::before,
+  .card::before { animation: none !important; }
+  .btn { transition: none; }
+}
