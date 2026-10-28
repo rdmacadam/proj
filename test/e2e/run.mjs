@@ -187,6 +187,31 @@ async function rippleDelta(page, spawn) {
   return { baseline, rippled: meanAbsDiff(b, c) };
 }
 
+// What the user actually sees: screenshot a corner (clear of the hero and card) and measure it.
+// Reading GL pixels cannot catch something opaque painted over the canvas.
+async function shotStats(page, clip = { x: 0, y: 0, width: 160, height: 160 }) {
+  const b64 = (await page.screenshot({ clip })).toString("base64");
+  const probe = await browser.newPage();
+  const stats = await probe.evaluate(async data => {
+    const img = new Image();
+    img.src = `data:image/png;base64,${data}`;
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = img.width;
+    c.height = img.height;
+    const g = c.getContext("2d");
+    g.drawImage(img, 0, 0);
+    const px = g.getImageData(0, 0, c.width, c.height).data;
+    const v = [];
+    for (let i = 0; i < px.length; i += 4) v.push((px[i] + px[i + 1] + px[i + 2]) / 3);
+    const mean = v.reduce((a, b) => a + b, 0) / v.length;
+    return { mean, std: Math.sqrt(v.reduce((a, b) => a + (b - mean) ** 2, 0) / v.length) };
+  }, b64);
+  await probe.close();
+  return stats;
+}
+const looksVisible = s => s.mean > 20 && s.std > 8;
+
 async function pageChecks() {
   // desktop: mouse ripples and card tilt
   {
@@ -194,6 +219,10 @@ async function pageChecks() {
     const ok = await waitBg(page);
     check("page-bg-created", ok);
     if (ok) {
+      await sleep(500);
+      const seen = await shotStats(page);
+      check("screenshot-shows-background", looksVisible(seen), `mean ${seen.mean.toFixed(1)} std ${seen.std.toFixed(1)}`);
+
       const { baseline, rippled } = await rippleDelta(page, async () => {
         await page.mouse.move(500, 300);
         for (let i = 1; i <= 8; i++) await page.mouse.move(500 + i * 60, 450);
@@ -253,6 +282,8 @@ async function pageChecks() {
     const { ctx, page } = await openPage({ init: () => { HTMLCanvasElement.prototype.getContext = () => null; } });
     check("no-webgl-fallback", await waitBody(page, "no-gl"));
     check("no-webgl-canvas-hidden", !(await page.locator("#bg").isVisible()));
+    const seen = await shotStats(page);
+    check("no-webgl-screenshot-shows-fallback", looksVisible(seen), `mean ${seen.mean.toFixed(1)} std ${seen.std.toFixed(1)}`);
     await ctx.close();
   }
 
@@ -262,6 +293,8 @@ async function pageChecks() {
     const isStatic = await waitBody(page, "static");
     await sleep(300);
     check("reduced-motion", isStatic && (await page.evaluate(() => window.__bg === undefined)));
+    const seen = await shotStats(page);
+    check("reduced-motion-screenshot-shows-fallback", looksVisible(seen), `mean ${seen.mean.toFixed(1)} std ${seen.std.toFixed(1)}`);
     await ctx.close();
   }
 

@@ -26,7 +26,7 @@ body {
   margin: 0;
   min-height: 100svh;
   color: var(--white);
-  background: var(--deep);
+  /* no body background: it would paint over the z-index:-1 canvas and backdrop; html supplies the base */
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -98,8 +98,13 @@ h1 {
   font-size: clamp(0.7rem, 2.6vw, 0.85rem);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: rgba(255, 244, 251, 0.78);
-  text-shadow: 0 1px 12px rgba(5, 6, 15, 0.9);
+  font-weight: 500;
+  text-wrap: balance;
+  color: rgba(255, 244, 251, 0.92);
+  text-shadow: 0 0 14px rgba(5, 6, 15, 0.95), 0 0 4px rgba(5, 6, 15, 0.9), 0 1px 2px rgba(5, 6, 15, 0.8);
+}
+@media (max-width: 480px) {
+  .tagline { letter-spacing: 0.2em; }
 }
 
 .card {
