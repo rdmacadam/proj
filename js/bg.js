@@ -91,11 +91,16 @@ export function createBackground(canvas, image, opts = {}) {
 
   function resize() {
     if (!gl) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
-    const w = Math.max(1, Math.round(canvas.clientWidth * dpr * quality.scale));
-    const h = Math.max(1, Math.round(canvas.clientHeight * dpr * quality.scale));
-    if (canvas.width !== w) canvas.width = w;
-    if (canvas.height !== h) canvas.height = h;
+    // No layout (display:none, e.g. while the page shows its fallback): keep the current
+    // size rather than collapsing the drawing buffer, which nothing may notice to restore.
+    if (canvas.clientWidth > 0 && canvas.clientHeight > 0) {
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+      const w = Math.max(1, Math.round(canvas.clientWidth * dpr * quality.scale));
+      const h = Math.max(1, Math.round(canvas.clientHeight * dpr * quality.scale));
+      if (canvas.width !== w) canvas.width = w;
+      if (canvas.height !== h) canvas.height = h;
+    }
+    const { width: w, height: h } = canvas;
     gl.viewport(0, 0, w, h);
     gl.uniform2f(u.uRes, w, h);
     const [sx, sy] = coverScale(w, h, image.naturalWidth, image.naturalHeight);

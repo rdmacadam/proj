@@ -123,6 +123,21 @@ async function bgChecks() {
     );
   }
 
+  // A resize while the canvas has no layout (display:none, e.g. during context loss) must not
+  // collapse the drawing buffer; toggling within one task means no ResizeObserver rescue.
+  await page.setViewportSize({ width: 800, height: 600 });
+  await sleep(400);
+  const collapsed = await page.evaluate(async () => {
+    const c = document.getElementById("bg");
+    const before = c.width;
+    c.style.display = "none";
+    window.__bg.resize();
+    c.style.display = "";
+    await new Promise(r => setTimeout(r, 400));
+    return { before, after: c.width };
+  });
+  check("hidden-resize-keeps-size", collapsed.after >= collapsed.before * 0.5, JSON.stringify(collapsed));
+
   // returning to a hidden tab
   await page.evaluate(() => window.__bg.pause());
   await sleep(1500);
