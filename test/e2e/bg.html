@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bg test page</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; }
+    canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <script type="module">
+    import { createBackground } from "/js/bg.js";
+    try {
+      const img = new Image();
+      img.src = "/assets/chladni.jpg";
+      await img.decode();
+      window.__bg = createBackground(document.getElementById("bg"), img, { grain: 0 });
+    } catch (e) {
+      window.__err = String(e);
+      window.__bg = null;
+    }
+    window.__ready = true;
+  </script>
+</body>
+</html>
