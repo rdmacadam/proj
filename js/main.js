@@ -74,7 +74,8 @@ if (!body.classList.contains("static")) {
     bg?.setPointer(x, y, false);
   });
 
-  // device tilt: Android and desktop subscribe straight away; iOS asks on the first tap
+  // device tilt: Android and desktop subscribe straight away; iOS asks on the first tap.
+  // The request hangs off pointerup: iOS Safari only fires `click` on tappable elements.
   const onOrient = e => {
     if (e.gamma == null || e.beta == null) return;
     const nx = clamp(e.gamma / 30, -1, 1);
@@ -87,7 +88,7 @@ if (!body.classList.contains("static")) {
   if (DOE) {
     if (typeof DOE.requestPermission === "function") {
       window.addEventListener(
-        "click",
+        "pointerup",
         async () => {
           try {
             if ((await DOE.requestPermission()) === "granted") listenTilt();

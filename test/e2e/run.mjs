@@ -20,6 +20,8 @@ const VIEWPORTS = [
   [320, 568],
   [1440, 900],
   [2560, 600],
+  [844, 390], // landscape phones
+  [667, 375],
 ];
 
 async function layoutChecks() {
@@ -35,6 +37,7 @@ async function layoutChecks() {
 
     const box = await page.locator("#multaichat").boundingBox().catch(() => null);
     check(`card-fits@${tag}`, !!box && box.x >= 0 && box.x + box.width <= w, JSON.stringify(box));
+    check(`card-in-view@${tag}`, !!box && box.y >= 0 && box.y + box.height <= h, JSON.stringify(box));
 
     const title = await page.locator("h1").first().textContent().catch(() => null);
     check(`title@${tag}`, title?.trim() === "Projects", String(title));
@@ -274,6 +277,9 @@ async function pageChecks() {
     });
     await page.locator("#multaichat .btn").tap();
     check("btn-tappable@phone", await page.evaluate(() => window.__clicked));
+    // drags become ripples, but pinch-zoom must stay available (WCAG 1.4.4)
+    const touchAction = await page.evaluate(() => getComputedStyle(document.body).touchAction);
+    check("pinch-zoom-allowed@phone", touchAction.includes("pinch-zoom") && !touchAction.includes("none"), touchAction);
     await ctx.close();
   }
 
@@ -316,6 +322,30 @@ async function pageChecks() {
       check("context-restored", back && channelStd(bytes) > 8, `back=${back}`);
     } else {
       check("context-lost-fallback", false, "bg never created");
+    }
+    await ctx.close();
+  }
+
+  // iOS only fires `click` on tappable elements, so the permission request must hang off pointerup
+  {
+    const { ctx, page } = await openPage({
+      init: () => {
+        window.__perm = 0;
+        window.DeviceOrientationEvent = Object.assign(function () {}, {
+          requestPermission: async () => {
+            window.__perm++;
+            return "granted";
+          },
+        });
+      },
+    });
+    if (await waitBg(page)) {
+      await page.evaluate(() => window.dispatchEvent(new PointerEvent("pointerup", { clientX: 100, clientY: 100, pointerType: "touch", isPrimary: true })));
+      await sleep(200);
+      const calls = await page.evaluate(() => window.__perm);
+      check("ios-permission-on-pointerup", calls === 1, `requestPermission calls: ${calls}`);
+    } else {
+      check("ios-permission-on-pointerup", false, "bg never created");
     }
     await ctx.close();
   }

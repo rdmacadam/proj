@@ -19,7 +19,7 @@ html {
   overscroll-behavior: none;
 }
 /* main.js sets this when the page fits the screen, so drags become ripples, not scrolls */
-body.noscroll { touch-action: none; }
+body.noscroll { touch-action: pinch-zoom; } /* drags are ours; pinch-zoom stays available */
 .btn { touch-action: manipulation; }
 
 body {
@@ -83,7 +83,7 @@ h1 {
   font-family: ui-serif, Georgia, "Times New Roman", serif;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(3.25rem, 14vw, 8.5rem);
+  font-size: clamp(3.25rem, min(14vw, 18svh), 8.5rem);
   line-height: 1;
   letter-spacing: -0.01em;
   background: linear-gradient(100deg, var(--white) 10%, var(--pink) 45%, var(--teal) 80%);
@@ -189,6 +189,19 @@ h1 {
 @keyframes hue {
   from { filter: hue-rotate(0deg) saturate(1.15); }
   to { filter: hue-rotate(360deg) saturate(1.15); }
+}
+
+/* Landscape phones: compact everything so the card stays above the fold.
+   Kept after the base rules so it wins the cascade. */
+@media (max-height: 520px) {
+  main { gap: 16px; padding-top: 12px; padding-bottom: 12px; }
+  h1 { font-size: clamp(2.5rem, min(14vw, 16svh), 8.5rem); }
+  .tagline { margin-top: 8px; }
+  .card { padding: 20px 28px; }
+  .eyebrow { margin-bottom: 6px; }
+  .card h2 { font-size: 2rem; }
+  .blurb { margin: 8px 0 16px; }
+  .btn { padding: 10px 22px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
